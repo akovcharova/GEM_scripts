@@ -43,9 +43,9 @@ function Main() {
     var x0_conn = 100
     var y0_conn = 720
 
-    var wire_length = 20
+    var wire_length = 40
 
-    var nPads = 10 // 128
+    var nPads = 128 // 128
     var pad_name = 'PLATED_HOLE0.5_PAD1.5'
     var pad_lib_index = 7
 
@@ -64,10 +64,10 @@ function Main() {
 
             // connect left pad 
             var pad_label = 'V'+ (iconn+1) +'_'+ ((ipad+1)*2-1)
-            IntMan.PlaceLibraryComponent(
-                pad_name, 
-                IntMan.AvailableLibraryPath(pad_lib_index),
-                'Designator='+ pad_label +'|Location.X='+ x_lpad*1e5 +'|Location.Y='+ y_pad*1e5) 
+            // IntMan.PlaceLibraryComponent(
+            //     pad_name, 
+            //     IntMan.AvailableLibraryPath(pad_lib_index),
+            //     'Designator='+ pad_label +'|Location.X='+ x_lpad*1e5 +'|Location.Y='+ y_pad*1e5) 
 
             var SchWire = SchServer.SchObjectFactory(eWire,eCreate_GlobalCopy)
             SchWire.SetState_LineWidth = eSmall
@@ -86,10 +86,10 @@ function Main() {
 
             // connect right pad
             pad_label = 'V'+ (iconn+1) +'_'+ (ipad+1)*2
-            IntMan.PlaceLibraryComponent(
-                pad_name, 
-                IntMan.AvailableLibraryPath(pad_lib_index),
-                'Designator='+ pad_label +'|Location.X='+ x_rpad*1e5 +'|Location.Y='+ y_pad*1e5)    
+            // IntMan.PlaceLibraryComponent(
+            //     pad_name, 
+            //     IntMan.AvailableLibraryPath(pad_lib_index),
+            //     'Designator='+ pad_label +'|Mirrored|Location.X='+ x_rpad*1e5 +'|Location.Y='+ y_pad*1e5)    
 
             SchWire = SchServer.SchObjectFactory(eWire,eCreate_GlobalCopy)
             SchWire.SetState_LineWidth = eSmall
