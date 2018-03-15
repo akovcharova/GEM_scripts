@@ -1,13 +1,14 @@
 #! /usr/bin/env python
 import ezdxf
+import math
 
 # intersection of a circle (x-a)^2+(y-b)^2 = R^2 and a line y = cx+d
 def getLineCircleIntercept(a, b, R, c, d):
-    _sqrt = sqrt(-a^2*c^2 + 2*a*b*c - 2*a*c*d - b^2 + 2*b*d + c^2*R^2 - d^2 + R^2)
-    x0 = (-_sqrt + a + b*c - c*d)/(c^2 + 1)
-    y0 = c*x0 + b
-    x1 = (_sqrt + a + b*c - c*d)/(c^2 + 1)
-    y1 = c*x1 + b
+    _sqrt = math.sqrt(-a*a*c*c + 2*a*b*c - 2*a*c*d - b*b + 2*b*d + c*c*R*R - d*d + R*R)
+    x0 = (-_sqrt + a + b*c - c*d)/(c*c + 1)
+    y0 = c*x0 + d
+    x1 = (_sqrt + a + b*c - c*d)/(c*c + 1)
+    y1 = c*x1 + d
     return x0, y0, x1, y1
 
 # intersection of line (y=ax+b) and (y=cx+d) 
@@ -26,9 +27,10 @@ sign = lambda x: x and (1, -1)[x < 0]
 
 #--------------------------------------------------------------
 
+debug = False
 board = 'ME0'
 # handles for finding lines on the drawing
-active_area_color = 150
+active_area_color = 150 # blue, 50 - yellow, 82 - green, 222 - purple, 10 - red, 40 - orange
 chamber_cover_color = 1
 segmentation_color = 3
 
@@ -49,23 +51,38 @@ cutout = [
   [1448.0, 230.0], [1290.439116, 230.0]
 ]
 
+# nEtaSegm = 8
+# nStripsPerConn = 12 #128
+# nConnPerRow = 3
+# gap = 2 #0.2
+# via_radius = 3.5 #0.3
+
 nEtaSegm = 8
 nStripsPerConn = 128
 nConnPerRow = 3
 gap = 0.2
+via_radius = 0.3
 
-# start point - P1
-# end point - P2
-# center point - P0
+# specify where to place the vias in each segment
+via_row_radii = []
+for iseg in range(nEtaSegm):
+    if (board=='ME0' and iseg==nEtaSegm-1): # leaving room for Opto-hybrid
+        via_row_radii.append(segm_def[iseg][0] + 20 + 2*via_radius)
+    else:
+        via_row_radii.append((segm_def[iseg][0] + segm_def[iseg+1][0])/2)
 
-# radius R = distance from P0 to P1
-# L = 0.5 * distance from P1 to P2
-
-# bulge = ( R - sqrt(R*R - L*L) ) / L
 
 original_dwg = ezdxf.readfile("ME0-2018.dxf")
 dwg = ezdxf.new(dxfversion=original_dwg.dxfversion)
 msp = dwg.modelspace()
+dwg.layers.new(name='Strip gaps', dxfattribs={'linetype': 'Continuous', 'color': 40})
+dwg.layers.new(name='Strips', dxfattribs={'linetype': 'DASHED', 'color': 222})
+dwg.layers.new(name='Vias', dxfattribs={'linetype': 'Continuous', 'color': 10})
+
+# check available linetypes
+# print('available line types:')
+# for linetype in dwg.linetypes:
+#     print('{}: {}'.format(linetype.dxf.name, linetype.dxf.description))
 
 # declaring linetypes that are not default, but were used in the original
 # if not present, AutoCAD would not open the file...
@@ -94,31 +111,112 @@ me0_maxy = 0
 if (board == 'ME0'): # do not extrapolate strips all the way due to irregular shape
     _c,_d = getLineDef(segm_def[0][0], segm_def[0][1], segm_def[-3][0], segm_def[-3][1])
     me0_maxy = _c*segm_def[-1][0]+_d
-    print me0_maxy
 
-lo_pts, hi_pts = [], []
-lo_len = segm_def[0][1]*2.
-hi_len = segm_def[-1][1]*2.
+gap_pts_lo, gap_pts_hi = [], []
+gap_line_def = []
+str_line_def = []
+width_lo = segm_def[0][1]*2.
+width_hi = segm_def[-1][1]*2.
 if (board=='ME0'):
-    hi_len = me0_maxy*2
+    width_hi = me0_maxy*2
 
-wlo_strip = (lo_len - (nStripsPerConn*nConnPerRow-1)*gap)/(nStripsPerConn*nConnPerRow*1.)
-whi_strip = (hi_len - (nStripsPerConn*nConnPerRow-1)*gap)/(nStripsPerConn*nConnPerRow*1.)
-for i in range(nStripsPerConn*nConnPerRow-1):
-    lo_pts.append((segm_def[0][0], i*(wlo_strip+gap) + wlo_strip + gap/2. - lo_len/2., gap, gap))
-    if (board=='ME0'):
-        _x = segm_def[-1][0]
-        _y = i*(whi_strip+gap) + whi_strip + gap/2. - hi_len/2.
-        if (abs(_y) > segm_def[-1][1]):
-            _a,_b = getLineDef(lo_pts[-1][0], lo_pts[-1][1], _x, _y)
-            _c,_d = 0, sign(_y)*cutout[0][1] # cutout slope is 0 and intercept is y
-            _x,_y = getLineLineIntercept(_a,_b,_c,_d)
-        hi_pts.append((_x, _y, gap, gap))
-    else:
-        hi_pts.append((segm_def[-1][0], i*(whi_strip+gap) + whi_strip + gap/2. - hi_len/2., gap, gap))
+str_width_lo = (width_lo - (nStripsPerConn*nConnPerRow-1)*gap)/(nStripsPerConn*nConnPerRow*1.)
+str_width_hi = (width_hi - (nStripsPerConn*nConnPerRow-1)*gap)/(nStripsPerConn*nConnPerRow*1.)
+for i in range(nStripsPerConn*nConnPerRow):
+    # gaps
+    if (i<nStripsPerConn*nConnPerRow-1):
+        gap_pts_lo.append((segm_def[0][0], i*(str_width_lo+gap) + str_width_lo + gap/2. - width_lo/2., gap, gap))
+        # high end of gaps
+        if (board=='ME0'):
+            _x = segm_def[-1][0]
+            _y = i*(str_width_hi+gap) + str_width_hi + gap/2. - width_hi/2.
+            if (abs(_y) > segm_def[-1][1]):
+                _a,_b = getLineDef(gap_pts_lo[-1][0], gap_pts_lo[-1][1], _x, _y)
+                _c,_d = 0, sign(_y)*cutout[0][1] # cutout slope is 0 and intercept is y
+                _x,_y = getLineLineIntercept(_a,_b,_c,_d)
+            gap_pts_hi.append((_x, _y, gap, gap))
+        else:
+            gap_pts_hi.append((segm_def[-1][0], i*(str_width_hi+gap) + str_width_hi + gap/2. - width_hi/2., gap, gap))
+        # also need the line definition for finding overlaps with vias later
+        _a, _b = getLineDef(gap_pts_lo[-1][0], gap_pts_lo[-1][1], gap_pts_hi[-1][0], gap_pts_hi[-1][1])
+        gap_line_def.append([_a,_b])
+    # strips
+    str_lo_x = segm_def[0][0]
+    str_lo_y = i*(str_width_lo+gap) + str_width_lo/2. - width_lo/2.
+    str_hi_x = segm_def[-1][0]
+    str_hi_y = i*(str_width_hi+gap) + str_width_hi/2. - width_hi/2.
+    _a,_b = getLineDef(str_lo_x, str_lo_y, str_hi_x, str_hi_y)
+    str_line_def.append([_a, _b])
+    if (debug): msp.add_lwpolyline([(0, _b),(1500, _a*1500+_b)], dxfattribs={'layer': 'Strip gaps'})
 
-for istrip in range(len(lo_pts)):
-    msp.add_lwpolyline([lo_pts[istrip], hi_pts[istrip]])
+# add via rows - saving center positions for later
+via_centers = []
+for iseg in range(nEtaSegm):
+    via_centers.append([])
+    # determine strip width at desired radius for lowest lying strip, here the via would be in the narrowest portion
+    this_width = 2*(str_line_def[-1][0]*via_row_radii[iseg]+str_line_def[-1][0])
+    str_width = (this_width - (nStripsPerConn*nConnPerRow-1)*gap)/(nStripsPerConn*nConnPerRow*1.)    
+    for istr in range(nStripsPerConn*nConnPerRow):
+        # get via center
+        _x0,_y0,_x1,_y1 = 0, 0, 0, 0
+        if (str_width>2*(via_radius)): # single row
+            _x0,_y0,_x1,_y1 = getLineCircleIntercept(0,0,via_row_radii[iseg],str_line_def[istr][0], str_line_def[istr][1])
+        else: # strips too thin, zig-zag
+            if (istr%2==0):
+                _x0,_y0,_x1,_y1 = getLineCircleIntercept(0,0,via_row_radii[iseg]-2*via_radius,str_line_def[istr][0], str_line_def[istr][1])
+            else:
+                _x0,_y0,_x1,_y1 = getLineCircleIntercept(0,0,via_row_radii[iseg]+2*via_radius,str_line_def[istr][0], str_line_def[istr][1])
+        via_x, via_y = _x0, _y0
+        if (_x0<0): via_x, via_y = _x1, _y1
+        via_centers[-1].append((via_x,via_y))
+        # draw vias for reference
+        if (abs(_y0)<cutout[0][1]):
+            msp.add_circle((via_x, via_y), via_radius, dxfattribs={'layer': 'Vias'})
+
+# draw gaps
+for istr in range(nStripsPerConn*nConnPerRow-1):
+    # list of points to  define strip gap
+    this_str = [gap_pts_lo[istr]]
+    # loop over eta segments to find via overlaps
+    for iseg in range(nEtaSegm):
+        this_width = 2*(str_line_def[-1][0]*via_row_radii[iseg]+str_line_def[-1][0])
+        str_width = (this_width - (nStripsPerConn*nConnPerRow-1)*gap)/(nStripsPerConn*nConnPerRow*1.) 
+        # overlaps
+        if (str_width>2*(via_radius)):
+            continue
+        else:
+            # adding gap/2 to radius to account for thickness of gap
+            via_eff_radius = via_radius+gap/2.
+            # intersection with last via 
+            _x2,_y2,_x3,_y3 = getLineCircleIntercept(via_centers[iseg][istr][0],via_centers[iseg][istr][1],via_eff_radius,gap_line_def[istr][0], gap_line_def[istr][1])
+            dist = 0.5*math.sqrt((_x3-_x2)*(_x3-_x2) + (_y3-_y2)*(_y3-_y2))
+            bulge1 = -(via_eff_radius - math.sqrt(via_eff_radius*via_eff_radius - dist*dist))/dist
+            # intersection with next via
+            _x4,_y4,_x5,_y5 = getLineCircleIntercept(via_centers[iseg][istr+1][0],via_centers[iseg][istr+1][1],via_eff_radius,gap_line_def[istr][0], gap_line_def[istr][1])
+            dist = 0.5*math.sqrt((_x5-_x4)*(_x5-_x4) + (_y5-_y4)*(_y5-_y4))
+            bulge2 = (via_eff_radius - math.sqrt(via_eff_radius*via_eff_radius - dist*dist))/dist
+            # by definition of the intercept function _x2<_x3 and _x4<_x5
+            if (_x2<_x4):
+                this_str.append((_x2, _y2, gap, gap, bulge1))
+                this_str.append((_x3, _y3, gap, gap))
+                this_str.append((_x4, _y4, gap, gap, bulge2))
+                this_str.append((_x5, _y5, gap, gap))
+            else:
+                this_str.append((_x4, _y4, gap, gap, bulge2))
+                this_str.append((_x5, _y5, gap, gap))    
+                this_str.append((_x2, _y2, gap, gap, bulge1))
+                this_str.append((_x3, _y3, gap, gap))                
+
+    # add last point and draw gap
+    this_str.append(gap_pts_hi[istr])
+    msp.add_lwpolyline(this_str, dxfattribs={'layer': 'Strip gaps'})
+
+# add gaps
+for istr in range(nStripsPerConn*nConnPerRow):
+    # gaps between eta segments
+    for iseg in range(nEtaSegm+1):
+        msp.add_lwpolyline([(segm_def[iseg][0],segm_def[iseg][1], gap, gap), (segm_def[iseg][0], -segm_def[iseg][1], gap, gap)], dxfattribs={'layer': 'Strip gaps'})
+
 
 # hatch = msp.add_hatch(color=2)  # by default a solid fill hatch with fill color=7 (white/black)
 # with hatch.edit_boundary() as boundary:  # edit boundary path (context manager)
