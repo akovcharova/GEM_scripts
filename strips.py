@@ -65,13 +65,20 @@ bites = [
 ]
 
 # specify where to place the vias in each segment
-via_row_radii = []
-for iseg in range(nEtaSegm):
-    if (board=='ME0' and iseg==nEtaSegm-1): # leaving room for Opto-hybrid
-        via_row_radii.append(segm_def[iseg][0] + 20 + 2*via_radius)
-    else:
-        via_row_radii.append((segm_def[iseg][0] + segm_def[iseg+1][0])/2)
-
+via_row_radii = [0]*nEtaSegm
+if (board=='ME0'):
+    if (nEtaSegm!=8): # for tests just put the via rows in the middle of segment
+        for iseg in range(nEtaSegm):
+            via_row_radii[iseg] = (segm_def[iseg+1][0] + segm_def[iseg][0])/2
+    else: # adjust radii to make room for Optohybrid and connectors
+        for iseg in range(3):
+            via_row_radii[iseg] = segm_def[iseg+1][0]-10*via_radius
+        via_row_radii[3] = segm_def[4][0]-10
+        via_row_radii[4] = segm_def[5][0]-25
+        via_row_radii[5] = segm_def[6][0]-50
+        via_row_radii[6] = segm_def[7][0]-80
+        via_row_radii[7] = segm_def[7][0] + 20 + 2*via_radius
+                
 
 original_dwg = ezdxf.readfile("ME0-2018.dxf")
 dwg = ezdxf.new(dxfversion=original_dwg.dxfversion)
@@ -153,6 +160,7 @@ for i in range(nStripsPerConn*nConnPerRow):
     if (debug): msp.add_lwpolyline([(0, _b),(1500, _a*1500+_b)], dxfattribs={'layer': 'Strip gaps'})
 
 # add via rows - saving center positions for later
+via_file = open('via_centers.txt','w')
 via_centers = []
 for iseg in range(nEtaSegm):
     via_centers.append([])
@@ -172,9 +180,11 @@ for iseg in range(nEtaSegm):
         via_x, via_y = _x0, _y0
         if (_x0<0): via_x, via_y = _x1, _y1
         via_centers[-1].append((via_x,via_y))
+        via_file.write("{:.10} {:.10}\n".format(round(via_x,4), round(via_y,4)))
         # draw vias for reference
         if (abs(_y0)<bites[-1][0][1]): # if within the y coordinate of bite
             msp.add_circle((via_x, via_y), via_radius, dxfattribs={'layer': 'Vias'})
+via_file.close()
 
 # draw gaps
 for istr in range(nStripsPerConn*nConnPerRow+1):
