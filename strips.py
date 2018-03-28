@@ -79,6 +79,8 @@ if (board=='ME0'):
         via_row_radii[6] = segm_def[7][0]-80
         via_row_radii[7] = segm_def[7][0] + 20 + 2*via_radius
                 
+for i in via_row_radii:
+    print i
 
 original_dwg = ezdxf.readfile("ME0-2018.dxf")
 dwg = ezdxf.new(dxfversion=original_dwg.dxfversion)
@@ -160,7 +162,8 @@ for i in range(nStripsPerConn*nConnPerRow):
     if (debug): msp.add_lwpolyline([(0, _b),(1500, _a*1500+_b)], dxfattribs={'layer': 'Strip gaps'})
 
 # add via rows - saving center positions for later
-via_file = open('via_centers.txt','w')
+via_file = open(board+'_via_centers.js','w')
+via_file.write('function CreateViaArray() {\n');
 via_centers = []
 for iseg in range(nEtaSegm):
     via_centers.append([])
@@ -180,10 +183,11 @@ for iseg in range(nEtaSegm):
         via_x, via_y = _x0, _y0
         if (_x0<0): via_x, via_y = _x1, _y1
         via_centers[-1].append((via_x,via_y))
-        via_file.write("{:.10} {:.10}\n".format(round(via_x,4), round(via_y,4)))
         # draw vias for reference
         if (abs(_y0)<bites[-1][0][1]): # if within the y coordinate of bite
             msp.add_circle((via_x, via_y), via_radius, dxfattribs={'layer': 'Vias'})
+            via_file.write("   x.push({:.10}); y.push({:.10});\n".format(round(via_x,4), round(via_y,4)))
+via_file.write('}\n');
 via_file.close()
 
 # draw gaps
@@ -261,4 +265,4 @@ for ibite in bites:
 #     if e.dxftype()=='LINE':
 #         print e.dxf.color, e.dxf.linetype, e.dxf.start, e.dxf.end
 
-dwg.saveas("test.dxf")
+dwg.saveas(board+".dxf")
