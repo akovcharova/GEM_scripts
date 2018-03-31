@@ -31,9 +31,10 @@ function Main() {
     // return
 
     // ---- Place connectors and pads, add wires and assign net labels
-    var nConnectors = 24
+    var nConnectors = 12
+    var nPads = 156
     var conn_name = 'HIROSE_FX10A-140S/14-SV(71)'//'PANASONIC_AXK6SA3677YG'
-    var conn_lib_index = 6
+    var conn_lib_index = 0
     var conn_sep = 230
     var conn_width = 40
     var conn_height = 900
@@ -43,10 +44,6 @@ function Main() {
     var y0_conn = 2000
 
     var wire_length = 40
-
-    var nPads = 156
-    var pad_name = 'PLATED_HOLE0.5_PAD1.5'
-    var pad_lib_index = 7
 
     for (var iconn = 0; iconn < nConnectors; iconn++) {
         var x_conn = x0_conn + (iconn%12)*conn_sep
@@ -67,10 +64,6 @@ function Main() {
             // connect left pad 
             var pad_label = 'V'+ (129-(ivia+1)/2)
             if (ipad%2==0) pad_label = 'V'+ (ivia/2)
-            // IntMan.PlaceLibraryComponent(
-            //     pad_name, 
-            //     IntMan.AvailableLibraryPath(pad_lib_index),
-            //     'Designator='+ pad_label +'|Location.X='+ x_pad*1e5 +'|Location.Y='+ y_pad*1e5) 
             
             var SchWire = SchServer.SchObjectFactory(eWire,eCreate_GlobalCopy)
             SchWire.SetState_LineWidth = eSmall

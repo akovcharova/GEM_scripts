@@ -29,6 +29,13 @@ sign = lambda x: x and (1, -1)[x < 0]
 
 debug = False
 board = 'ME0'
+
+board = "GE21_M4"
+
+block_label = "BLOCK173"
+if (board!="ME0"): block_label = "BLOCK80"
+chimney_label = "BLOCK432"
+
 # handles for finding lines on the drawing
 active_area_color = 150 # blue, 50 - yellow, 82 - green, 222 - purple, 10 - red, 40 - orange
 chamber_cover_color = 1
@@ -41,28 +48,42 @@ segmentation_color = 3
 # via_radius = 3.5 #0.3
 
 nEtaSegm = 8
-nStripsPerConn = 128
 nConnPerRow = 3
+nStripsPerConn = 128
 gap = 0.2
 via_radius = 0.3
+if (board!="ME0"):
+    nEtaSegm = 2
+    nConnPerRow = 6
 
 # define segment by the highest point in Y
-segm_def = [
-  [660.0, 117.588162+gap],
-  [727.456, 129.616053+gap],
-  [801.892, 142.888528+gap],
-  [884.139, 157.553761+gap],
-  [975.077, 173.768662+gap],
-  [1075.708, 191.711895+gap],
-  [1187.178, 211.587799+gap],
-  [1310.804, 230.0+gap],
-  [1448.0, 230.0+gap]
-]
+segm_def = []
+if (board=="ME0"):
+    segm_def = [
+      [660.0, 117.588162+gap],
+      [727.456, 129.616053+gap],
+      [801.892, 142.888528+gap],
+      [884.139, 157.553761+gap],
+      [975.077, 173.768662+gap],
+      [1075.708, 191.711895+gap],
+      [1187.178, 211.587799+gap],
+      [1310.804, 230.0+gap],
+      [1448.0, 230.0+gap]
+    ]
+elif (board=="GE21_M4"):
+    segm_def = [
+      [2726.0, 488.029303+gap],
+      [2962.0, 530.28+gap],
+      [3198.0, 572.530342+gap]
+    ]
 
-bites = [
-  [(1448.0, -230.0-gap/2., gap, gap), (1290.439116, -230.0-gap/2., gap, gap)],
-  [(1448.0, 230.0+gap/2., gap, gap), (1290.439116, 230.0+gap/2., gap, gap)]
-]
+# ME0 is not a trapezoid so need the additional geometrical constraints 
+bites = []
+if (board=="ME0"):
+    bites = [
+        [(1448.0, -230.0-gap/2., gap, gap), (1290.439116, -230.0-gap/2., gap, gap)],
+        [(1448.0, 230.0+gap/2., gap, gap), (1290.439116, 230.0+gap/2., gap, gap)]
+    ]
 
 # specify where to place the vias in each segment
 via_row_radii = [0]*nEtaSegm
@@ -78,11 +99,13 @@ if (board=='ME0'):
         via_row_radii[5] = segm_def[6][0]-50
         via_row_radii[6] = segm_def[7][0]-80
         via_row_radii[7] = segm_def[7][0] + 20 + 2*via_radius
-                
-for i in via_row_radii:
-    print i
+else:
+    via_row_radii = [segm_def[0][0]+110, segm_def[0][0]+410]
+      
+if (debug):          
+    for i in via_row_radii: print i
 
-original_dwg = ezdxf.readfile("ME0-2018.dxf")
+original_dwg = ezdxf.readfile(board+"_outline.dxf")
 dwg = ezdxf.new(dxfversion=original_dwg.dxfversion)
 msp = dwg.modelspace()
 dwg.layers.new(name='Strip gaps', dxfattribs={'linetype': 'Continuous', 'color': 40})
@@ -106,12 +129,26 @@ for name, desc, pattern in my_line_types:
 
 # copy board from the original DXF and paste it into the new one
 importer = ezdxf.Importer(original_dwg, dwg)
-importer.import_blocks(query='BLOCK173', conflict='discard')
-msp.add_blockref('BLOCK173',(0,0), dxfattribs={
+importer.import_blocks(query=block_label, conflict='discard')
+board_rotation = 180.
+if (board!="ME0"):
+    board_rotation = -90.
+msp.add_blockref(block_label,(0,0), dxfattribs={
         'xscale': 1.,
         'yscale': 1.,
-        'rotation': 180.
+        'rotation': board_rotation
     })
+
+if (board!="ME0"):  
+    chimney_dwg = ezdxf.readfile(board+"_chimney.dxf")
+    importer = ezdxf.Importer(chimney_dwg, dwg)
+    importer.import_blocks(query=chimney_label, conflict='discard')
+    board_rotation = -90.
+    msp.add_blockref(chimney_label,(0,0), dxfattribs={
+            'xscale': 1.,
+            'yscale': 1.,
+            'rotation': board_rotation
+        })
 
 # edit an existing polyline
 # line = msp.query('LWPOLYLINE')[0]
@@ -184,7 +221,7 @@ for iseg in range(nEtaSegm):
         if (_x0<0): via_x, via_y = _x1, _y1
         via_centers[-1].append((via_x,via_y))
         # draw vias for reference
-        if (abs(_y0)<bites[-1][0][1]): # if within the y coordinate of bite
+        if (board!="ME0" or abs(_y0)<bites[-1][0][1]): # if within the y coordinate of bite
             msp.add_circle((via_x, via_y), via_radius, dxfattribs={'layer': 'Vias'})
             via_file.write("   x.push({:.10}); y.push({:.10});\n".format(round(via_x,4), round(via_y,4)))
 via_file.write('}\n');
@@ -248,18 +285,8 @@ for iseg in range(nEtaSegm+1):
 for ibite in bites:  
     msp.add_lwpolyline(ibite, dxfattribs={'layer': 'Strip gaps'})
 
-# hatch = msp.add_hatch(color=2)  # by default a solid fill hatch with fill color=7 (white/black)
-# with hatch.edit_boundary() as boundary:  # edit boundary path (context manager)
-#     # every boundary path is always a 2D element
-#     # vertex format for the polyline path is: (x, y[, bulge])
-#     # bulge value 1 = an arc with diameter=10 (= distance to next vertex * bulge value)
-#     # bulge value > 0 ... arc is right of line
-#     # bulge value < 0 ... arc is left of line
-#     boundary.add_polyline_path([(660.0, 115.), (660.0, 117.588162), 
-#         (727.456, 129.616053), (727.456, 127)], is_closed=1)
-
 # print some info for debug
-# block = dwg.blocks.get('BLOCK173')  # get all INSERT entities with entity.dxf.name == "Part12"
+# block = dwg.blocks.get(block_label)  # get all INSERT entities with entity.dxf.name == "Part12"
 # print block.name
 # for e in block:
 #     if e.dxftype()=='LINE':
