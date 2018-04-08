@@ -1,5 +1,6 @@
 function Main() {
    var board_name = "GE21_M4";
+   var hybrid_len = 80;
    // offset of origin in Altium wrt AutoCAD
    var offset_x = 0;
    var offset_y = 400;
@@ -70,50 +71,79 @@ function Main() {
                y += max_y[row];
             }
          } else if (board_name=="GE21_M4") {
-            y = (i%6)*2*max_y[row]/5-max_y[row];
+            var hybrid_gap = (2*max_y[row]-6*hybrid_len)/5
+            if (i%6>=3) y = max_y[row]-(5-i%6)*(hybrid_gap+hybrid_len);
+            else y = -(max_y[row]-(i%6)*(hybrid_gap+hybrid_len));
          }
          x += offset_x;
          y += offset_y;
 
          conn.MoveToXY(MMsToCoord(x), MMsToCoord(y));
-         if (board_name=="GE21_M4" && row==0) conn.RotateBy(90);
-         else conn.RotateBy(-90);
+         if (board_name=="GE21_M4") {
+            if (i%6>=3) conn.RotateBy(90);
+            else conn.RotateBy(-90);
+         } else {
+            conn.RotateBy(-90);
+         }
          PCBServer.SendMessageToRobots(conn.I_ObjectAddress, c_Broadcast, 
                                        PCBM_EndModify , c_NoEventData);
 
          // determine all the coordinates for the connector ground skeleton
          var gnd_x = [];
          var gnd_y = [];
+         var track_width = [];
 
          // spine
          var spine_len = 40;
+         track_width.push(2.3);
          gnd_x.push(x-spine_len/2);      gnd_y.push(y); //start
          gnd_x.push(x+spine_len/2);      gnd_y.push(y); //end
 
          // fork at start
+         track_width.push(0.5);
          gnd_x.push(gnd_x[0]);          gnd_y.push(gnd_y[0]);     // fork up
          gnd_x.push(gnd_x[0]-1.3);      gnd_y.push(gnd_y[0]+1.3);          
+         track_width.push(0.5);
          gnd_x.push(gnd_x[0]-1.3);      gnd_y.push(gnd_y[0]+1.3); // lengthen
-         gnd_x.push(gnd_x[0]-1.3-2.3);  gnd_y.push(gnd_y[0]+1.3); 
+         gnd_x.push(gnd_x[0]-1.3-2.8);  gnd_y.push(gnd_y[0]+1.3); 
+         track_width.push(0.2);
+         gnd_x.push(gnd_x[0]-1.3-2.8);  gnd_y.push(gnd_y[0]+1.3); // connect to copper plane up
+         gnd_x.push(gnd_x[0]-1.3-2.8);  gnd_y.push(gnd_y[0]+1.3+1.5); 
+         track_width.push(0.5);
          gnd_x.push(gnd_x[0]);          gnd_y.push(gnd_y[0]);     // fork down
          gnd_x.push(gnd_x[0]-1.3);      gnd_y.push(gnd_y[0]-1.3);          
+         track_width.push(0.5);
          gnd_x.push(gnd_x[0]-1.3);      gnd_y.push(gnd_y[0]-1.3); // lengthen
-         gnd_x.push(gnd_x[0]-1.3-2.3);  gnd_y.push(gnd_y[0]-1.3); 
+         gnd_x.push(gnd_x[0]-1.3-2.8);  gnd_y.push(gnd_y[0]-1.3); 
+         track_width.push(0.2);
+         gnd_x.push(gnd_x[0]-1.3-2.8);  gnd_y.push(gnd_y[0]-1.3); // connect to copper plane down
+         gnd_x.push(gnd_x[0]-1.3-2.8);  gnd_y.push(gnd_y[0]-1.3-1.5); 
 
          // fork at end
+         track_width.push(0.5);
          gnd_x.push(gnd_x[1]);          gnd_y.push(gnd_y[1]);     // fork up
          gnd_x.push(gnd_x[1]+1.3);      gnd_y.push(gnd_y[1]+1.3);          
+         track_width.push(0.5);
          gnd_x.push(gnd_x[1]+1.3);      gnd_y.push(gnd_y[1]+1.3); // lengthen
-         gnd_x.push(gnd_x[1]+1.3+2.3);  gnd_y.push(gnd_y[1]+1.3); 
+         gnd_x.push(gnd_x[1]+1.3+2.8);  gnd_y.push(gnd_y[1]+1.3); 
+         track_width.push(0.2);
+         gnd_x.push(gnd_x[1]+1.3+2.8);  gnd_y.push(gnd_y[1]+1.3); // connect to copper plane up
+         gnd_x.push(gnd_x[1]+1.3+2.8);  gnd_y.push(gnd_y[1]+1.3+1.5); 
+         track_width.push(0.5);
          gnd_x.push(gnd_x[1]);          gnd_y.push(gnd_y[1]);     // fork down
          gnd_x.push(gnd_x[1]+1.3);      gnd_y.push(gnd_y[1]-1.3);          
+         track_width.push(0.5);
          gnd_x.push(gnd_x[1]+1.3);      gnd_y.push(gnd_y[1]-1.3); // lengthen
-         gnd_x.push(gnd_x[1]+1.3+2.3);  gnd_y.push(gnd_y[1]-1.3); 
+         gnd_x.push(gnd_x[1]+1.3+2.8);  gnd_y.push(gnd_y[1]-1.3); 
+         track_width.push(0.2);
+         gnd_x.push(gnd_x[1]+1.3+2.8);  gnd_y.push(gnd_y[1]-1.3);  // connect to copper plane down
+         gnd_x.push(gnd_x[1]+1.3+2.8);  gnd_y.push(gnd_y[1]-1.3-1.5);
 
          // ribs
          var rib_gap = 6;
          var rib_len = 6;
          for (var irib=0; irib<7; irib++){
+            track_width.push(0.2);
             gnd_x.push(x+(irib-3)*rib_gap);         gnd_y.push(y+rib_len/2);
             gnd_x.push(x+(irib-3)*rib_gap);         gnd_y.push(y-rib_len/2);
          }
@@ -127,7 +157,7 @@ function Main() {
             track.X2          = MMsToCoord(gnd_x[ind+1]);
             track.Y2          = MMsToCoord(gnd_y[ind+1]);
             track.Layer       = eTopLayer;
-            track.Width       = MMsToCoord(0.5);
+            track.Width       = MMsToCoord(track_width[itrack]);
             track.Net         = net;
             board.AddPCBObject(track);
 

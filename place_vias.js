@@ -50,8 +50,14 @@ function Main() {
             via.HighLayer = eTopLayer
 
             var conn = Math.floor(ivia/128)+1;
+            if (board_name=="GE21_M4") conn = 13-conn;
             var pin = ivia%128 + 1;
-            if (board_name=="GE21_M4" && conn<7) pin = 129-pin;
+            if (board_name=="GE21_M4"){
+                var conn_group = Math.floor((conn-1)/3);
+                if (conn_group==0) pin = (pin+63)%128+1;
+                if (conn_group==2) pin = 129-pin;
+                if (conn_group==3) pin = (Math.floor((pin-1)/64))*64+(64-(pin-1)%64);
+            }
             var net_name = 'C'+conn+'_V'+pin;
             net = Iterator.FirstPCBObject;
             while (net != null && net.Name != net_name) {

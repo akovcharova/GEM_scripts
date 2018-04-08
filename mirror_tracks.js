@@ -70,7 +70,9 @@ function Main() {
          var iconn = parseInt(tmp[0]);
          if (iconn > 6) iconn = 12-(iconn-1)%6;
          else iconn = 6-(iconn-1);
-         var ivia = 129-parseInt(tmp[1]);
+         var ivia = parseInt(tmp[1]);
+         if (ivia<65) ivia = 65-ivia;
+         else ivia = 64+(129-ivia)%65;
          var new_name = "C"+iconn+"_V"+ivia;
 
          var found_net = false; 
