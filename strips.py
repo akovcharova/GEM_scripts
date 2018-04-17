@@ -30,11 +30,17 @@ sign = lambda x: x and (1, -1)[x < 0]
 debug = False
 board = 'ME0'
 
-board = "GE21_M4"
+board = "GE21_M1"
 
 block_label = "BLOCK173"
-if (board!="ME0"): block_label = "BLOCK80"
-chimney_label = "BLOCK432"
+chimney_label = ""
+if (board=="GE21_M1"): 
+    block_label = "BLOCK385"
+    chimney_label = "BLOCK638"
+elif (board=="GE21_M4"): 
+    block_label = "BLOCK80"
+    chimney_label = "BLOCK432"
+
 
 # handles for finding lines on the drawing
 active_area_color = 150 # blue, 50 - yellow, 82 - green, 222 - purple, 10 - red, 40 - orange
@@ -70,12 +76,19 @@ if (board=="ME0"):
       [1310.804, 230.0+gap],
       [1448.0, 230.0+gap]
     ]
+elif (board=="GE21_M1"):
+    segm_def = [
+      [1365.5, 244.462221+gap],
+      [1561.0, 279.4608+gap],
+      [1756.5, 314.462022+gap]
+    ]
 elif (board=="GE21_M4"):
     segm_def = [
       [2726.0, 488.029303+gap],
       [2962.0, 530.28+gap],
       [3198.0, 572.530342+gap]
     ]
+
 
 # ME0 is not a trapezoid so need the additional geometrical constraints 
 bites = []
@@ -99,9 +112,12 @@ if (board=='ME0'):
         via_row_radii[5] = segm_def[6][0]-50
         via_row_radii[6] = segm_def[7][0]-80
         via_row_radii[7] = segm_def[7][0] + 20 + 2*via_radius
-else:
+elif (board=="GE21_M1"):
+    via_row_radii = [segm_def[0][0]+110, segm_def[0][0]+260]
+elif (board=="GE21_M4"):
     via_row_radii = [segm_def[0][0]+110, segm_def[0][0]+410]
-      
+
+
 if (debug):          
     for i in via_row_radii: print i
 
