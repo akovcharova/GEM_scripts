@@ -106,18 +106,18 @@ function Main() {
          track_width.push(0.5);
          gnd_x.push(gnd_x[0]-1.3);      gnd_y.push(gnd_y[0]+1.3); // lengthen
          gnd_x.push(gnd_x[0]-1.3-2.8);  gnd_y.push(gnd_y[0]+1.3); 
-         track_width.push(0.2);
-         gnd_x.push(gnd_x[0]-1.3-2.8);  gnd_y.push(gnd_y[0]+1.3); // connect to copper plane up
-         gnd_x.push(gnd_x[0]-1.3-2.8);  gnd_y.push(gnd_y[0]+1.3+1.5); 
+         // track_width.push(0.2);
+         // gnd_x.push(gnd_x[0]-1.3-2.8);  gnd_y.push(gnd_y[0]+1.3); // connect to copper plane up
+         // gnd_x.push(gnd_x[0]-1.3-2.8);  gnd_y.push(gnd_y[0]+1.3+1.5); 
          track_width.push(0.5);
          gnd_x.push(gnd_x[0]);          gnd_y.push(gnd_y[0]);     // fork down
          gnd_x.push(gnd_x[0]-1.3);      gnd_y.push(gnd_y[0]-1.3);          
          track_width.push(0.5);
          gnd_x.push(gnd_x[0]-1.3);      gnd_y.push(gnd_y[0]-1.3); // lengthen
          gnd_x.push(gnd_x[0]-1.3-2.8);  gnd_y.push(gnd_y[0]-1.3); 
-         track_width.push(0.2);
-         gnd_x.push(gnd_x[0]-1.3-2.8);  gnd_y.push(gnd_y[0]-1.3); // connect to copper plane down
-         gnd_x.push(gnd_x[0]-1.3-2.8);  gnd_y.push(gnd_y[0]-1.3-1.5); 
+         // track_width.push(0.2);
+         // gnd_x.push(gnd_x[0]-1.3-2.8);  gnd_y.push(gnd_y[0]-1.3); // connect to copper plane down
+         // gnd_x.push(gnd_x[0]-1.3-2.8);  gnd_y.push(gnd_y[0]-1.3-1.5); 
 
          // fork at end
          track_width.push(0.5);
@@ -126,18 +126,18 @@ function Main() {
          track_width.push(0.5);
          gnd_x.push(gnd_x[1]+1.3);      gnd_y.push(gnd_y[1]+1.3); // lengthen
          gnd_x.push(gnd_x[1]+1.3+2.8);  gnd_y.push(gnd_y[1]+1.3); 
-         track_width.push(0.2);
-         gnd_x.push(gnd_x[1]+1.3+2.8);  gnd_y.push(gnd_y[1]+1.3); // connect to copper plane up
-         gnd_x.push(gnd_x[1]+1.3+2.8);  gnd_y.push(gnd_y[1]+1.3+1.5); 
+         // track_width.push(0.2);
+         // gnd_x.push(gnd_x[1]+1.3+2.8);  gnd_y.push(gnd_y[1]+1.3); // connect to copper plane up
+         // gnd_x.push(gnd_x[1]+1.3+2.8);  gnd_y.push(gnd_y[1]+1.3+1.5); 
          track_width.push(0.5);
          gnd_x.push(gnd_x[1]);          gnd_y.push(gnd_y[1]);     // fork down
          gnd_x.push(gnd_x[1]+1.3);      gnd_y.push(gnd_y[1]-1.3);          
          track_width.push(0.5);
          gnd_x.push(gnd_x[1]+1.3);      gnd_y.push(gnd_y[1]-1.3); // lengthen
          gnd_x.push(gnd_x[1]+1.3+2.8);  gnd_y.push(gnd_y[1]-1.3); 
-         track_width.push(0.2);
-         gnd_x.push(gnd_x[1]+1.3+2.8);  gnd_y.push(gnd_y[1]-1.3);  // connect to copper plane down
-         gnd_x.push(gnd_x[1]+1.3+2.8);  gnd_y.push(gnd_y[1]-1.3-1.5);
+         // track_width.push(0.2);
+         // gnd_x.push(gnd_x[1]+1.3+2.8);  gnd_y.push(gnd_y[1]-1.3);  // connect to copper plane down
+         // gnd_x.push(gnd_x[1]+1.3+2.8);  gnd_y.push(gnd_y[1]-1.3-1.5);
 
          // ribs
          var rib_gap = 6;

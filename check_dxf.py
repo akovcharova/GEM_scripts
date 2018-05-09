@@ -2,11 +2,15 @@
 import ezdxf
 import math
 
-board = "GE21_M4"
-orig_dxf_file = board+"_outline.dxf"
+board = "GE21_M1"
+orig_dxf_file = "HIROSE_FX10A_140S_14_SV.dxf" # board+"_chimney.dxf"
 
 block_label = "BLOCK173"
-if (board!="ME0"):
+if (board=="GE21_M1"): 
+    # block_label = "BLOCK385"
+    block_label = "BLOCK638" # chimney drawing
+    block_label = "Hirose"
+elif (board=="GE21_M4"): 
     block_label = "BLOCK80"
 
 active_area_color = 150 # blue, 50 - yellow, 82 - green, 222 - purple, 10 - red, 40 - orange
@@ -15,6 +19,7 @@ segmentation_color = 3
 
 original_dwg = ezdxf.readfile(orig_dxf_file)
 dwg = ezdxf.new(dxfversion=original_dwg.dxfversion)
+print original_dwg.dxfversion
 msp = dwg.modelspace()
 dwg.layers.new(name='Strip gaps', dxfattribs={'linetype': 'Continuous', 'color': 40})
 dwg.layers.new(name='Strips', dxfattribs={'linetype': 'DASHED', 'color': 222})
@@ -49,6 +54,7 @@ block = dwg.blocks.get(block_label)  # get all INSERT entities with entity.dxf.n
 print block.name
 for e in block:
     if e.dxftype()=='LINE':
-        print e.dxf.color, e.dxf.linetype, e.dxf.start, e.dxf.end
+        print e.dxf.color, e.dxf.linetype, e.dxftype()#, e.dxf.start, e.dxf.end
 
 dwg.saveas(board+".dxf")
+print "  open",board+".dxf"
