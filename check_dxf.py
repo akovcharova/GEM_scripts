@@ -3,7 +3,6 @@ import ezdxf
 import math
 
 board = "GE21_M1"
-orig_dxf_file = "HIROSE_FX10A_140S_14_SV.dxf" # board+"_chimney.dxf"
 
 block_label = "BLOCK173"
 if (board=="GE21_M1"): 
@@ -17,7 +16,7 @@ active_area_color = 150 # blue, 50 - yellow, 82 - green, 222 - purple, 10 - red,
 chamber_cover_color = 1
 segmentation_color = 3
 
-original_dwg = ezdxf.readfile(orig_dxf_file)
+original_dwg = ezdxf.readfile("in/"+board+"_outline.dxf")
 dwg = ezdxf.new(dxfversion=original_dwg.dxfversion)
 print original_dwg.dxfversion
 msp = dwg.modelspace()

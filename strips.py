@@ -121,7 +121,7 @@ elif (board=="GE21_M4"):
 if (debug):          
     for i in via_row_radii: print i
 
-original_dwg = ezdxf.readfile(board+"_outline.dxf")
+original_dwg = ezdxf.readfile("in/"+board+"_outline.dxf")
 dwg = ezdxf.new(dxfversion=original_dwg.dxfversion)
 msp = dwg.modelspace()
 dwg.layers.new(name='Strip gaps', dxfattribs={'linetype': 'Continuous', 'color': 40})
@@ -156,7 +156,7 @@ msp.add_blockref(block_label,(0,0), dxfattribs={
     })
 
 if (board!="ME0"):  
-    chimney_dwg = ezdxf.readfile(board+"_chimney.dxf")
+    chimney_dwg = ezdxf.readfile("in/"+board+"_chimney.dxf")
     importer = ezdxf.Importer(chimney_dwg, dwg)
     importer.import_blocks(query=chimney_label, conflict='discard')
     board_rotation = -90.
@@ -215,7 +215,7 @@ for i in range(nStripsPerConn*nConnPerRow):
     if (debug): msp.add_lwpolyline([(0, _b),(1500, _a*1500+_b)], dxfattribs={'layer': 'Strip gaps'})
 
 # add via rows - saving center positions for later
-via_file = open(board+'_via_centers.js','w')
+via_file = open("via_coord/"+board+'_via_centers.js','w')
 via_file.write('function CreateViaArray() {\n');
 via_centers = []
 for iseg in range(nEtaSegm):
@@ -308,4 +308,7 @@ for ibite in bites:
 #     if e.dxftype()=='LINE':
 #         print e.dxf.color, e.dxf.linetype, e.dxf.start, e.dxf.end
 
-dwg.saveas(board+".dxf")
+outfile = "out/"+board+".dxf"
+dwg.saveas(outfile)
+print "   open "+outfile
+

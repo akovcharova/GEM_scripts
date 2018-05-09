@@ -160,7 +160,7 @@ for name, desc, pattern in my_line_types:
 #   Import drawings of board outline, active area and chimney
 # --------------------------------------------------------------
 
-outline_dwg = ezdxf.readfile(board+"_outline.dxf")
+outline_dwg = ezdxf.readfile("in/"+board+"_outline.dxf")
 outline_importer = ezdxf.Importer(outline_dwg, dwg)
 outline_importer.import_blocks(query=block_label, conflict='discard')
 board_rotation = 180.
@@ -173,7 +173,7 @@ msp.add_blockref(block_label,(0,0), dxfattribs={
     })
 
 if (board!="ME0"):  
-    chimney_dwg = ezdxf.readfile(board+"_chimney.dxf")
+    chimney_dwg = ezdxf.readfile("in/"+board+"_chimney.dxf")
     outline_importer = ezdxf.Importer(chimney_dwg, dwg)
     outline_importer.import_blocks(query=chimney_label, conflict='discard')
     board_rotation = -90.
@@ -242,7 +242,7 @@ for i in range(nStripsPerConn*nConnPerRow):
 
 # import connector footprint
 conn_name = 'Hirose'
-conn_dwg = ezdxf.readfile("HIROSE_FX10A_140S_14_SV.dxf")
+conn_dwg = ezdxf.readfile("in/HIROSE_FX10A_140S_14_SV.dxf")
 conn_importer = ezdxf.Importer(conn_dwg, dwg)
 conn_importer.import_blocks(query=conn_name, conflict='discard')
 
@@ -608,4 +608,4 @@ for ibite in bites:
 #     if e.dxftype()=='LINE':
 #         print e.dxf.color, e.dxf.linetype, e.dxf.start, e.dxf.end
 
-dwg.saveas(board+".dxf")
+dwg.saveas("out/"+board+".dxf")
