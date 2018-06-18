@@ -30,6 +30,7 @@ sign = lambda x: x and (1, -1)[x < 0]
 debug = False
 draw_gaps = False
 draw_via_rows = False
+draw_traces = False
 OH4 = True
 
 board = "GE21_M1"
@@ -38,7 +39,7 @@ block_label = "BLOCK173"
 chimney_label = ""
 if (board=="GE21_M1"): 
     block_label = "BLOCK385"
-    chimney_label = "BLOCK638"
+    chimney_label = "BLOCK166" #"BLOCK638"
 elif (board=="GE21_M4"): 
     block_label = "BLOCK80"
     chimney_label = "BLOCK432"
@@ -173,7 +174,7 @@ msp.add_blockref(block_label,(0,0), dxfattribs={
     })
 
 if (board!="ME0"):  
-    chimney_dwg = ezdxf.readfile("in/"+board+"_chimney.dxf")
+    chimney_dwg = ezdxf.readfile("in/"+board+"_chimney_v2.dxf")
     outline_importer = ezdxf.Importer(chimney_dwg, dwg)
     outline_importer.import_blocks(query=chimney_label, conflict='discard')
     board_rotation = -90.
@@ -253,36 +254,36 @@ conn_dy = 70
 conn_edge_gap_x = 5
 conn_edge_gap_y = 10
 if (board=="GE21_M1"): 
-    rows_x = [segm_def[0][0]+conn_edge_gap_x, 
-              segm_def[0][0]+conn_dy+2*conn_edge_gap_x, 
-              segm_def[-1][0]-2*conn_dy-2*conn_edge_gap_x, 
-              segm_def[-1][0]-conn_dy-conn_edge_gap_x]
+    rows_x = [segm_def[0][0]+conn_edge_gap_x+conn_dy/2, 
+              segm_def[0][0]+conn_dy+2*conn_edge_gap_x+conn_dy/2, 
+              segm_def[-1][0]-2*conn_dy-2*conn_edge_gap_x-conn_dy/2, 
+              segm_def[-1][0]-conn_dy-conn_edge_gap_x-conn_dy/2]
 
 # this is the number of connectors per row of connectors, vs nConnPerRow = number of connectors per row of Strips
 conn_list = []
-_x = segm_def[0][0] + conn_edge_gap_x + 25 + 6.5 
+_x = segm_def[0][0] + conn_edge_gap_x + 25 + 6.5 +conn_dy/2
 _x2 = _x + conn_dy + conn_edge_gap_y
-conn_list.append([_x2, -((chimney_def_a*_x2+chimney_def_b)-conn_edge_gap_y-25), -90])
-conn_list.append([_x,  -((chimney_def_a*_x+chimney_def_b)-conn_edge_gap_y-25), -90])
+conn_list.append([_x2, -((chimney_def_a*_x2+chimney_def_b)-conn_edge_gap_y-25), 90])
+conn_list.append([_x,  -((chimney_def_a*_x+chimney_def_b)-conn_edge_gap_y-25), 90])
 _cstrip = 3*128+63
-conn_list.append([_x,  -(str_line_def[_cstrip][0]*_x + str_line_def[_cstrip][1]), -90])
-conn_list.append([_x,  str_line_def[_cstrip][0]*_x + str_line_def[_cstrip][1], -90])
-conn_list.append([_x,  (chimney_def_a*_x+chimney_def_b)-conn_edge_gap_y-25, -90])
-conn_list.append([_x2, (chimney_def_a*_x2+chimney_def_b)-conn_edge_gap_y-25, -90])
+conn_list.append([_x,  -(str_line_def[_cstrip][0]*_x + str_line_def[_cstrip][1]), 90])
+conn_list.append([_x,  str_line_def[_cstrip][0]*_x + str_line_def[_cstrip][1], 90])
+conn_list.append([_x,  (chimney_def_a*_x+chimney_def_b)-conn_edge_gap_y-25, 90])
+conn_list.append([_x2, (chimney_def_a*_x2+chimney_def_b)-conn_edge_gap_y-25, 90])
 
-_x = segm_def[-1][0] - conn_edge_gap_x - 25 - 6.5 
+_x = segm_def[-1][0] - conn_edge_gap_x - 25 - 6.5 -conn_dy/2
 _x2 = _x - conn_dy - conn_edge_gap_y
-conn_list.append([_x2, -((chimney_def_a*(_x2-conn_dy+6.5)+chimney_def_b)-conn_edge_gap_y-25), 90])
-conn_list.append([_x,  -((chimney_def_a*(_x-conn_dy+6.5)+chimney_def_b)-conn_edge_gap_y-25), 90])
+conn_list.append([_x2, -((chimney_def_a*(_x2-conn_dy+6.5)+chimney_def_b)-conn_edge_gap_y-25), -90])
+conn_list.append([_x,  -((chimney_def_a*(_x-conn_dy+6.5)+chimney_def_b)-conn_edge_gap_y-25), -90])
 _cstrip = 3*128+63
 if (OH4):
-    conn_list.append([_x,  -(str_line_def[_cstrip][0]*(_x-conn_dy+6.5) + str_line_def[_cstrip][1]), 90])
-    conn_list.append([_x,  str_line_def[_cstrip][0]*(_x-conn_dy+6.5) + str_line_def[_cstrip][1]-30, 90])
+    conn_list.append([_x,  -(str_line_def[_cstrip][0]*(_x-conn_dy+6.5) + str_line_def[_cstrip][1]), -90])
+    conn_list.append([_x,  str_line_def[_cstrip][0]*(_x-conn_dy+6.5) + str_line_def[_cstrip][1]-30, -90])
 else:
-    conn_list.append([_x-120,  -(str_line_def[_cstrip][0]*(_x-conn_dy+6.5) + str_line_def[_cstrip][1]), 90])
-    conn_list.append([_x-120,  str_line_def[_cstrip][0]*(_x-conn_dy+6.5) + str_line_def[_cstrip][1], 90])    
-conn_list.append([_x,  (chimney_def_a*(_x-conn_dy+6.5)+chimney_def_b)-conn_edge_gap_y-25, 90])
-conn_list.append([_x2, (chimney_def_a*(_x2-conn_dy+6.5)+chimney_def_b)-conn_edge_gap_y-25, 90])
+    conn_list.append([_x-120,  -(str_line_def[_cstrip][0]*(_x-conn_dy+6.5) + str_line_def[_cstrip][1]), -90])
+    conn_list.append([_x-120,  str_line_def[_cstrip][0]*(_x-conn_dy+6.5) + str_line_def[_cstrip][1], -90])    
+conn_list.append([_x,  (chimney_def_a*(_x-conn_dy+6.5)+chimney_def_b)-conn_edge_gap_y-25, -90])
+conn_list.append([_x2, (chimney_def_a*(_x2-conn_dy+6.5)+chimney_def_b)-conn_edge_gap_y-25, -90])
 
 trc_width = 0.15
 trc_gap = 0.2
@@ -293,6 +294,7 @@ for i,iconn in enumerate(conn_list):
             'yscale': 1.,
             'rotation': iconn[2]
         })
+    if (not draw_traces): continue
     if (i%6==0): via_centers.append([])
     # make the names sensical in case i need them later
     if (abs(iconn[2])==90):
@@ -445,6 +447,8 @@ for i,iconn in enumerate(conn_list):
 #             'yscale': 1.,
 #             'rotation': iconn[2]
 #         })
+#     if (not draw_traces): continue
+
 
 #     if (i%6==0): via_centers.append([])
 
@@ -497,11 +501,11 @@ for i,iconn in enumerate(conn_list):
 #                 else:
 #                     _trc.append((pin_x, pin_y-3, trc_width, trc_width))    
         
-#         # _trc.append((via_x, via_y, trc_width, trc_width))
-#         # via_centers[-1].append((via_x,via_y))
-#         # msp.add_circle((via_x, via_y), via_radius, dxfattribs={'layer': 'Vias'})
+        # _trc.append((via_x, via_y, trc_width, trc_width))
+        # via_centers[-1].append((via_x,via_y))
+        # msp.add_circle((via_x, via_y), via_radius, dxfattribs={'layer': 'Vias'})
 
-#         msp.add_lwpolyline(_trc, dxfattribs={'layer': 'Strip gaps'})
+        msp.add_lwpolyline(_trc, dxfattribs={'layer': 'Strip gaps'})
 
 #------------------------------------------------
 #                Via locations 
@@ -513,7 +517,7 @@ via_centers = []
 for iseg in range(nEtaSegm):
     via_centers.append([])
     # determine strip width at desired radius for lowest lying strip, here the via would be in the narrowest portion
-    this_width = 2*(str_line_def[-1][0]*via_row_radii[iseg]+str_line_def[-1][0])
+    this_width = 2*(str_line_def[-1][0]*via_row_radii[iseg]+str_line_def[-1][1])
     str_width = (this_width - (nStripsPerConn*nConnPerRow+1)*gap)/(nStripsPerConn*nConnPerRow*1.)    
     for istr in range(nStripsPerConn*nConnPerRow):
         # get via center
@@ -544,7 +548,7 @@ if (draw_gaps):
         this_str = [gap_pts_lo[istr]]
         # loop over eta segments to find via overlaps
         for iseg in range(nEtaSegm):
-            this_width = 2*(str_line_def[-1][0]*via_row_radii[iseg]+str_line_def[-1][0])
+            this_width = 2*(str_line_def[-1][0]*via_row_radii[iseg]+str_line_def[-1][1])
             str_width = (this_width - (nStripsPerConn*nConnPerRow+1)*gap)/(nStripsPerConn*nConnPerRow*1.) 
             # overlaps
             if (str_width>2*(via_radius)):
@@ -608,4 +612,4 @@ for ibite in bites:
 #     if e.dxftype()=='LINE':
 #         print e.dxf.color, e.dxf.linetype, e.dxf.start, e.dxf.end
 
-dwg.saveas("out/"+board+".dxf")
+dwg.saveas("out/"+board+"_horiz.dxf")

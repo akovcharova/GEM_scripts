@@ -221,7 +221,7 @@ via_centers = []
 for iseg in range(nEtaSegm):
     via_centers.append([])
     # determine strip width at desired radius for lowest lying strip, here the via would be in the narrowest portion
-    this_width = 2*(str_line_def[-1][0]*via_row_radii[iseg]+str_line_def[-1][0])
+    this_width = 2*(str_line_def[-1][0]*via_row_radii[iseg]+str_line_def[-1][1])
     str_width = (this_width - (nStripsPerConn*nConnPerRow+1)*gap)/(nStripsPerConn*nConnPerRow*1.)    
     for istr in range(nStripsPerConn*nConnPerRow):
         # get via center
@@ -249,7 +249,7 @@ for istr in range(nStripsPerConn*nConnPerRow+1):
     this_str = [gap_pts_lo[istr]]
     # loop over eta segments to find via overlaps
     for iseg in range(nEtaSegm):
-        this_width = 2*(str_line_def[-1][0]*via_row_radii[iseg]+str_line_def[-1][0])
+        this_width = 2*(str_line_def[-1][0]*via_row_radii[iseg]+str_line_def[-1][1])
         str_width = (this_width - (nStripsPerConn*nConnPerRow+1)*gap)/(nStripsPerConn*nConnPerRow*1.) 
         # overlaps
         if (str_width>2*(via_radius)):
