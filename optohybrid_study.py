@@ -135,9 +135,9 @@ if (debug):
 dwg = ezdxf.new(dxfversion='AC1027')
 msp = dwg.modelspace()
 dwg.layers.new(name='Strip gaps', dxfattribs={'linetype': 'Continuous', 'color': 40})
-dwg.layers.new(name='Even strips', dxfattribs={'linetype': 'DASHED', 'color': 222})
+dwg.layers.new(name='Even strips', dxfattribs={'linetype': 'DASHED', 'color': 41})
 dwg.layers.new(name='Center strips', dxfattribs={'linetype': 'DASHED', 'color': 90})
-dwg.layers.new(name='Odd strips', dxfattribs={'linetype': 'DASHED', 'color': 170})
+dwg.layers.new(name='Odd strips', dxfattribs={'linetype': 'DASHED', 'color': 151})
 dwg.layers.new(name='Vias', dxfattribs={'linetype': 'Continuous', 'color': 90})
 dwg.layers.new(name='Traces', dxfattribs={'linetype': 'Continuous', 'color': 10})
 
@@ -612,4 +612,6 @@ for ibite in bites:
 #     if e.dxftype()=='LINE':
 #         print e.dxf.color, e.dxf.linetype, e.dxf.start, e.dxf.end
 
-dwg.saveas("out/"+board+"_horiz.dxf")
+dwg.saveas("out/"+board+".dxf")
+print "open "+"out/"+board+".dxf"
+

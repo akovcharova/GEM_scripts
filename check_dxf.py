@@ -1,16 +1,32 @@
 #! /usr/bin/env python
 import ezdxf
 import math
+import argparse
 
-board = "GE21_M1"
+parser = argparse.ArgumentParser(description='Print DXF info.')
+parser.add_argument("-m", "--module", help="Enter module number", default="./")
+args = parser.parse_args()
+
+board = "GE21_M" + args.module
 
 block_label = "BLOCK173"
 if (board=="GE21_M1"): 
     # block_label = "BLOCK385"
     block_label = "BLOCK638" # chimney drawing
-    block_label = "Hirose"
-elif (board=="GE21_M4"): 
+elif (board=="GE21_M2"):
+    block_label = "BLOCK1654"
+elif (board=="GE21_M3"):
+    block_label = "BLOCK1743"
+elif (board=="GE21_M4"):
     block_label = "BLOCK80"
+elif (board=="GE21_M5"):
+    block_label = "BLOCK472"
+elif (board=="GE21_M6"):
+    block_label = "BLOCK1220"
+elif (board=="GE21_M7"):
+    block_label = "BLOCK1483"
+elif (board=="GE21_M8"):
+    block_label = "BLOCK258"
 
 active_area_color = 150 # blue, 50 - yellow, 82 - green, 222 - purple, 10 - red, 40 - orange
 chamber_cover_color = 1
@@ -53,7 +69,7 @@ block = dwg.blocks.get(block_label)  # get all INSERT entities with entity.dxf.n
 print block.name
 for e in block:
     if e.dxftype()=='LINE':
-        print e.dxf.color, e.dxf.linetype, e.dxftype()#, e.dxf.start, e.dxf.end
+        print e.dxf.color, e.dxf.linetype, e.dxftype(), e.dxf.start, e.dxf.end
 
-dwg.saveas(board+".dxf")
-print "  open",board+".dxf"
+dwg.saveas("out/"+board+".dxf")
+print "  open out/"+board+".dxf"
