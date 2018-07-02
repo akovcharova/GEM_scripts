@@ -51,6 +51,7 @@ chimney_label = ""
 segm_def = []
 conn_list = []
 opto_pts = []
+opto_y0 = 0
 if (board=="GE21_M1"):
     # name of block reference in input drawings for the active area and the chimney
     # this has to be retrieved by opening the input DXF files and looking up the names of the blocks
@@ -78,8 +79,11 @@ if (board=="GE21_M1"):
     conn_list.append([1605, 140, -90])
 
     # specify points defining boundary of optohybrid + space for master slave cable
+    # relative to the insertion point (i.e. coordinates are local to the opto)
     opto_pts = [[-85,95], [185,95], [185,40], 
                 [85,40], [85,-95], [-85,-95], [-85,95]]
+    # insertion point for optohybrid, x is taken to be the middle of the board, specify Y here:
+    opto_y0 = 6
 elif (board=="GE21_M2"):
     block_label = "BLOCK1654"
     chimney_label = "BLOCK438"
@@ -87,31 +91,52 @@ elif (board=="GE21_M2"):
       [1792.0, 320.817502+gap],
       [2183.0, 390.817303+gap]
     ]
-    # specify connector positions
-    conn_list.append([1930, -180, 90])
-    conn_list.append([1850, -170, 90])
-    conn_list.append([1850, -40, 90])
-    conn_list.append([1850, 40, 90])
-    conn_list.append([1850, 180, 90]) 
-    conn_list.append([1945, 190, 90])
+    _dx = 2183-1756.5
+    conn_list.append([1505+_dx+3, -180, 90])
+    conn_list.append([1425+_dx, -160, 90])
+    conn_list.append([1425+_dx, -55, 90])
+    conn_list.append([1425+_dx, 40, 90])
+    conn_list.append([1425+_dx, 160, 90])
+    conn_list.append([1520+_dx, 180, 90])
 
-    conn_list.append([2045, -185, -90])
-    conn_list.append([2120, -185, -90])
-    conn_list.append([2120, -65, -90])
-    conn_list.append([2120, 65, -90])
-    conn_list.append([2120, 185, -90])
-    conn_list.append([2045, 195, -90])
+    conn_list.append([1615+_dx-3, -190, -90])
+    conn_list.append([1695+_dx, -190, -90])
+    conn_list.append([1695+_dx, -60, -90])
+    conn_list.append([1695+_dx, 60, -90])
+    conn_list.append([1695+_dx, 190, -90])
+    conn_list.append([1605+_dx, 205, -90])
 
-    # specify points defining boundary of optohybrid + space for master slave cable
-    opto_pts = [[-85,95], [185,95], [185,40], 
-                [85,40], [85,-95], [-85,-95], [-85,95]]
+    opto_pts = [[-185,95], [85,95], [85,-95], 
+                [-85,-95], [-85,40], [-185, 40], [-185,95]]
+    opto_y0 = 31
 elif (board=="GE21_M3"):
     block_label = "BLOCK1743"
     chimney_label = "BLOCK528"
     segm_def = [
-      [0, 0+gap],
-      [0, 0+gap]
+      [2218.5, 397.17+gap],
+      [2690.5, 481.67+gap]
     ]
+
+    conn_list.append([2300, -230, 90])
+    conn_list.append([2300, -150, 90])
+    conn_list.append([2300, -40, 90])
+    conn_list.append([2300, 40, 90])
+    conn_list.append([2300, 150, 90])
+    conn_list.append([2300, 230, 90])
+
+    conn_list.append([2605, -280, -90])
+    conn_list.append([2605, -150, -90])
+    conn_list.append([2605, -65, -90])
+    conn_list.append([2605, 65, -90])
+    conn_list.append([2605, 150, -90])
+    conn_list.append([2605, 280, -90])
+
+    # specify points defining boundary of optohybrid + space for master slave cable
+    # relative to the insertion point (i.e. coordinates are local to the opto)
+    opto_pts = [[-85,95], [185,95], [185,40], 
+                [85,40], [85,-95], [-85,-95], [-85,95]]
+    # insertion point for optohybrid, x is taken to be the middle of the board, specify Y here:
+    opto_y0 = 6
 elif (board=="GE21_M4"):
     block_label = "BLOCK80"
     chimney_label = "BLOCK258"
@@ -189,7 +214,8 @@ for i in range(nStr*nConn+1):
     # gaps
     _start = (segm_def[0][0], i*(str_width_lo+gap) + gap/2. - width_lo/2., gap, gap)
     _end = (segm_def[-1][0], i*(str_width_hi+gap) + gap/2. - width_hi/2., gap, gap)
-    msp.add_lwpolyline([_start, _end], dxfattribs={'layer': 'Strip gaps'})
+    if not debug:
+        msp.add_lwpolyline([_start, _end], dxfattribs={'layer': 'Strip gaps'})
 
 # also the gaps between eta segments
 for iseg in range(nEta+1):
@@ -254,7 +280,7 @@ vfat.add_lwpolyline([(26+_buff,-6.5-_buff, trc_width, trc_width),
 opto = dwg.blocks.new(name='OPTO')
 opto.add_lwpolyline([(i[0],i[1], trc_width, trc_width) for i in opto_pts])
 
-msp.add_blockref("OPTO",((segm_def[0][0]+segm_def[-1][0])/2, 6), dxfattribs={
+msp.add_blockref("OPTO",((segm_def[0][0]+segm_def[-1][0])/2, opto_y0), dxfattribs={
     'xscale': 1.,
     'yscale': 1.,
     'rotation': 0
@@ -390,10 +416,11 @@ for i,iconn in enumerate(conn_list):
                 # segment reaching to the via
                 _trc.append((via_x, via_y, trc_width, trc_width))
                 
-            msp.add_lwpolyline(_trc, dxfattribs={'layer': 'Traces'})
-            via_centers.append([via_x, via_y])
-            msp.add_circle((via_x, via_y), via_radius, dxfattribs={'layer': 'Vias'})
-
+            if not debug:
+                msp.add_lwpolyline(_trc, dxfattribs={'layer': 'Traces'})
+                msp.add_circle((via_x, via_y), via_radius, dxfattribs={'layer': 'Vias'})
+                via_centers.append([via_x, via_y])
+            
 # --------------------------------------------------------------
 #   Import drawings of board outline, active area and chimney
 # --------------------------------------------------------------
