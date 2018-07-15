@@ -26,7 +26,7 @@ With these two input files in hand, the procedure is as follows:
 
 4. Run `make_ge21_rob.py` to obtain the DXF and examine it in AutoCAD. Debug mode shows the different sets of strips in different colors and hides the routing to make it easier to see things when initially deciding on connector placement. 
 
-5. When happy with the positions. Run above with `debug = False` to show the routing. Carefully check if it all looks reasonable and make sure there is no traces that are too close or overlapping; examine also if any traces pass too close to the vias. Clearances of > 20 mm should be sufficient. 
+5. When happy with the positions. Run above with `debug = False` to show the routing. Carefully check if it all looks reasonable and make sure there is no traces that are too close or overlapping; examine also if any traces pass too close to the vias. Clearances of > 0.2 mm should be sufficient. 
 
 ## Step 2. Import DXF into Altium
 
@@ -74,8 +74,17 @@ For installing a script project see here:
 
 8. Placing the vias and moving components to the proper positions
     * open the script `altium/place_comps_ge21_rob.js` for editing
-    * replace the functions `CreateViaArray` and `CreateConnectorArray` with those written by the python script `make_ge21_rob.py` in Step 1; these can be found in `via_coord/`*board_name*`_coord.js` (I've tried to make this less clunky, but could not get Altium to open the additional file by itself so far)
-    * modify the values for `offset_x` and `offset_y` with the ones you used when placing the AutoCAD origin when importing the DXF
+    * copy the functions `CreateViaArray_GE21...` and `CreateConnectorArray_GE21...` written by the python script `make_ge21_rob.py` in Step 1; these can be found in `via_coord/`*board_name*`_coord.js` (I've tried to make this less clunky, but could not get Altium to open the additional file by itself so far)
+    * change the variable `board_name` to the appropriate label 
+    * add the new case to the switch, the values for `offset_x` and `offset_y` should be the same you used when placing the AutoCAD origin when importing the DXF, and the functions names should be the ones you just pasted, e.g.:
+    ```
+     else if (board_name=="GE21_M4") {
+        offset_x = -2650;
+        offset_y = 650;
+        CreateConnectorArray_GE21_M4();
+        CreateViaArray_GE21_M4();
+    }
+    ```
     * run the script by going to `DXP > Run Script` in the pop-up select the function `Main` under `place_comps_ge21_rob.js` and click `OK`
     * Wait... depending on how much RAM you have could be a minute, or a few, until Altium is fully responsive again
 

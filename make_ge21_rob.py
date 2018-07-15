@@ -346,7 +346,8 @@ for i,iconn in enumerate(conn_list):
     turn_measure = 0.5*math.sin(22.5*math.pi/180)
     for iside in [0,1]: 
         # initialize segment length for trace coming out of the lowest pin of each connector
-        dl1, dl2 , dl3 = 1, 1, 64*2*turn_measure-5
+        dl1, dl2 , dl3 = 3, 1, 64*2*turn_measure-5
+        if i in [0,5,6,11]: dl1 = 1
         # dlen controls if the segment length coming out of each pin (dl1) is decreasing or increasing
         dlen = 1
 
@@ -383,7 +384,7 @@ for i,iconn in enumerate(conn_list):
             _x, _y = pin_x, pin_y
             _trc.append((_x, _y, trc_width, trc_width))
             if i in [0,5,6,11]:
-                dl1 += turn_measure 
+                dl1 += 1.2*turn_measure 
                 # segment coming out of pin
                 _x = pin_x+sgn_x*dl1 
                 _trc.append((_x, _y, trc_width, trc_width))
@@ -423,8 +424,7 @@ for i,iconn in enumerate(conn_list):
                     # go to via
                     _trc.append((via_x, via_y, trc_width, trc_width))
             else:
-                dl1 += dlen*turn_measure 
-                if dl1<2: dl1 = 2
+                dl1 += 1.3*dlen*turn_measure 
                 # segment coming out of pin
                 _x = pin_x+sgn_x*dl1 
                 _trc.append((_x, _y, trc_width, trc_width))
@@ -470,13 +470,13 @@ msp.add_blockref(chimney_label,(0,0), dxfattribs={
 #         Save via locations to a text file
 #------------------------------------------------
 js_file = open('via_coord/'+board+'_coord.js','w')
-js_file.write('function CreateConnectorArray() {\n');
+js_file.write('function CreateConnectorArray_'+board+'() {\n');
 for iconn in conn_list:
     js_file.write("\tconn_x.push({:.10});".format(round(iconn[0],4)))
     js_file.write("\tconn_y.push({:.10});".format(round(iconn[1],4)))
     js_file.write("\tconn_ang.push({:.10});\n".format(round(iconn[2],0)))
 js_file.write('}\n\n');
-js_file.write('function CreateViaArray() {\n');
+js_file.write('function CreateViaArray_'+board+'() {\n');
 for ivia in via_centers:
     js_file.write("\tx.push({:.10});".format(round(ivia[0],4)))
     js_file.write("\ty.push({:.10});\n".format(round(ivia[1],4)))
