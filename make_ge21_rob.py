@@ -32,10 +32,11 @@ sign = lambda x: x and (1, -1)[x < 0]
 #--------------------------------------------------------------
 
 parser = argparse.ArgumentParser(description='Print DXF info.')
-parser.add_argument("-m", "--module", help="Enter module number", default="./")
+parser.add_argument("-m", "--module", help="Enter module number", default="1")
+parser.add_argument("-d", "--debug", help="Debug mode", action="store_true")
 args = parser.parse_args()
 
-debug = False
+debug = args.debug
 
 board = "GE21_M" + args.module
 nStr = 64 # number of strips connected to one side of a connector
@@ -56,7 +57,7 @@ if (board=="GE21_M1"):
     # name of block reference in input drawings for the active area and the chimney
     # this has to be retrieved by opening the input DXF files and looking up the names of the blocks
     block_label = "BLOCK385"
-    chimney_label = "BLOCK166"
+    chimney_label = "BLOCK336"
     # specify corners of active area
     # again, retrieve from input DXF file
     segm_def = [
@@ -86,88 +87,107 @@ if (board=="GE21_M1"):
     opto_y0 = 6
 elif (board=="GE21_M2"):
     block_label = "BLOCK1654"
-    chimney_label = "BLOCK438"
+    chimney_label = "BLOCK415"
     segm_def = [
       [1792.0, 320.817502+gap],
       [2183.0, 390.817303+gap]
     ]
-    _dx = 2183-1756.5
-    conn_list.append([1505+_dx+3, -180, 90])
-    conn_list.append([1425+_dx, -160, 90])
-    conn_list.append([1425+_dx, -55, 90])
-    conn_list.append([1425+_dx, 40, 90])
-    conn_list.append([1425+_dx, 160, 90])
-    conn_list.append([1520+_dx, 180, 90])
+    conn_list.append([1935, -180, 90])
+    conn_list.append([1853, -160, 90])
+    conn_list.append([1853, -55, 90])
+    conn_list.append([1853, 15, 90])
+    conn_list.append([1853, 160, 90])
+    conn_list.append([1946, 180, 90])
 
-    conn_list.append([1615+_dx-3, -190, -90])
-    conn_list.append([1695+_dx, -190, -90])
-    conn_list.append([1695+_dx, -60, -90])
-    conn_list.append([1695+_dx, 60, -90])
-    conn_list.append([1695+_dx, 190, -90])
-    conn_list.append([1605+_dx, 205, -90])
+    conn_list.append([2038, -190, -90])
+    conn_list.append([2121, -190, -90])
+    conn_list.append([2121, -60, -90])
+    conn_list.append([2121, 60, -90])
+    conn_list.append([2121, 190, -90])
+    conn_list.append([2032, 203, -90])
 
     opto_pts = [[-185,95], [85,95], [85,-95], 
                 [-85,-95], [-85,40], [-185, 40], [-185,95]]
-    opto_y0 = 31
+    # must be the same for the master and the slave!
+    opto_y0 = 6
 elif (board=="GE21_M3"):
     block_label = "BLOCK1743"
-    chimney_label = "BLOCK528"
+    chimney_label = "BLOCK496"
     segm_def = [
       [2218.5, 397.17+gap],
       [2690.5, 481.67+gap]
     ]
 
-    conn_list.append([2300, -230, 90])
-    conn_list.append([2300, -150, 90])
-    conn_list.append([2300, -40, 90])
-    conn_list.append([2300, 40, 90])
-    conn_list.append([2300, 150, 90])
-    conn_list.append([2300, 230, 90])
+    conn_list.append([2395, -248, 90])
+    conn_list.append([2300, -210, 90])
+    conn_list.append([2300, -65, 90])
+    conn_list.append([2300, 65, 90])
+    conn_list.append([2300, 210, 90])
+    conn_list.append([2395, 249, 90])
 
-    conn_list.append([2605, -280, -90])
-    conn_list.append([2605, -150, -90])
-    conn_list.append([2605, -65, -90])
-    conn_list.append([2605, 65, -90])
-    conn_list.append([2605, 150, -90])
-    conn_list.append([2605, 280, -90])
+    conn_list.append([2515, -260, -90])
+    conn_list.append([2605, -235, -90])
+    conn_list.append([2605, -75, -90])
+    conn_list.append([2605, 105, -90])
+    conn_list.append([2605, 235, -90])
+    conn_list.append([2515, 275, -90])
 
     # specify points defining boundary of optohybrid + space for master slave cable
     # relative to the insertion point (i.e. coordinates are local to the opto)
     opto_pts = [[-85,95], [185,95], [185,40], 
                 [85,40], [85,-95], [-85,-95], [-85,95]]
     # insertion point for optohybrid, x is taken to be the middle of the board, specify Y here:
-    opto_y0 = 6
+    opto_y0 = -21
 elif (board=="GE21_M4"):
     block_label = "BLOCK80"
-    chimney_label = "BLOCK258"
+    chimney_label = "BLOCK582"
     segm_def = [
       [2726.0, 488.029303+gap],
       [3198.0, 572.530342+gap]
     ]
+
+    conn_list.append([2887, -320, 90])
+    conn_list.append([2810, -252, 90])
+    conn_list.append([2810, -85, 90])
+    conn_list.append([2810, 105, 90])
+    conn_list.append([2810, 252, 90])
+    conn_list.append([2887, 320, 90])
+
+    conn_list.append([3035, -352, -90])
+    conn_list.append([3110, -280, -90])
+    conn_list.append([3110, -95, -90])
+    conn_list.append([3110, 95, -90])
+    conn_list.append([3110, 280, -90])
+    conn_list.append([3035, 352, -90])
+
+    opto_pts = [[-185,95], [85,95], [85,-95], 
+                [-85,-95], [-85,40], [-185, 40], [-185,95]]
+    # must be the same for the master and the slave!
+    opto_y0 = -21
 elif (board=="GE21_M5"):
     block_label = "BLOCK472"
-    chimney_label = "BLOCK78"
+    chimney_label = "BLOCK662"
     segm_def = [
       [0, 0+gap],
       [0, 0+gap]
     ]
 elif (board=="GE21_M6"):
     block_label = "BLOCK1220"
-    chimney_label = "BLOCK166"
+    chimney_label = "BLOCK741"
     segm_def = [
       [0, 0+gap],
       [0, 0+gap]
     ]
 elif (board=="GE21_M7"):
     block_label = "BLOCK1483"
-    chimney_label = "BLOCK256"
+    chimney_label = "BLOCK822"
     segm_def = [
       [0, 0+gap],
       [0, 0+gap]
     ]
 elif (board=="GE21_M8"):
     block_label = "BLOCK258"
-    chimney_label = "BLOCK343"
+    chimney_label = "BLOCK905"
     segm_def = [
       [0, 0+gap],
       [0, 0+gap]
@@ -195,7 +215,8 @@ dwg.layers.new(name='Traces', dxfattribs={'linetype': 'Continuous', 'color': 40}
 # if not present, AutoCAD would not open the file...
 my_line_types = [
     ("DASHSPACE", "Dashspace - - - - - - - - - - - - - - - -", [10.0, 5.0, -5.0]),
-    ("DOT", "Dot . . . . . . . . . . . . . . . . . . . ", [5.0, 0.0, -5.0]),
+    ("DOT", "Dot - - - - - - - - - - - - - - - -", [5.0, 5.0, -5.0])
+    # ("DOT", "Dot . . . . . . . . . . . . . . . . . . . ", [5.0, 0.0, -5.0])
 ]
 for name, desc, pattern in my_line_types:
     if name not in dwg.linetypes:
@@ -246,7 +267,7 @@ for i in range(nStr*nConn):
     str_hi_y = i*(str_width_hi+gap) + gap + str_width_hi/2. - width_hi/2.
     _a,_b = getLineDef(str_lo_x, str_lo_y, str_hi_x, str_hi_y)
     str_line_def.append([_a, _b])
-    if (debug): 
+    if (debug and not (i/nStr)%2==0): 
         msp.add_lwpolyline([(segm_def[0][0], _a*segm_def[0][0]+_b),
             (segm_def[-1][0], _a*segm_def[-1][0]+_b)], 
             dxfattribs={'layer': strip_layer})
@@ -361,7 +382,7 @@ for i,iconn in enumerate(conn_list):
             _trc = []
             _x, _y = pin_x, pin_y
             _trc.append((_x, _y, trc_width, trc_width))
-            if (iconn[1]+25)<first_str_y or (iconn[1]-25)>last_str_y:
+            if i in [0,5,6,11]:
                 dl1 += turn_measure 
                 # segment coming out of pin
                 _x = pin_x+sgn_x*dl1 
@@ -465,6 +486,8 @@ js_file.close()
 #------------------------------------------------
 #        Save output drawing to a DXF file
 #------------------------------------------------
-dwg.saveas("out/"+board+".dxf")
-print "open "+"out/"+board+".dxf"
+fname = "out/"+board+".dxf"
+if (debug): fname = "out/"+board+"_dbg.dxf"
+dwg.saveas(fname)
+print "open "+fname
 
