@@ -164,13 +164,37 @@ elif (board=="GE21_M4"):
                 [-85,-95], [-85,40], [-185, 40], [-185,95]]
     # must be the same for the master and the slave!
     opto_y0 = -21
+    
 elif (board=="GE21_M5"):
     block_label = "BLOCK472"
     chimney_label = "BLOCK662"
     segm_def = [
-      [0, 0+gap],
-      [0, 0+gap]
+      [1365.5, 244.4622+gap],
+      [1797, 321.7126+gap]
     ]
+
+    # specify connector positions
+    conn_list.append([1522, -125, 90])
+    conn_list.append([1429, -117, 90])
+    conn_list.append([1429, -40, 90])
+    conn_list.append([1429, 40, 90])
+    conn_list.append([1429, 117, 90])
+    conn_list.append([1522, 132, 90])
+
+    conn_list.append([1635, -128, -90])
+    conn_list.append([1732, -154, -90])
+    conn_list.append([1732, -52, -90])
+    conn_list.append([1732, 15, -90])
+    conn_list.append([1732, 154, -90])
+    conn_list.append([1625, 140, -90])
+
+    # specify points defining boundary of optohybrid + space for master slave cable
+    # relative to the insertion point (i.e. coordinates are local to the opto)
+    opto_pts = [[-85,95], [185,95], [185,40], 
+                [85,40], [85,-95], [-85,-95], [-85,95]]
+
+    opto_y0 = 6
+    
 elif (board=="GE21_M6"):
     block_label = "BLOCK1220"
     chimney_label = "BLOCK741"
